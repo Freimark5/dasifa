@@ -1,0 +1,17 @@
+# Android Studio
+.idea/
+*.iml
+# Gradle
+.gradle/
+build/
+# Lokale Konfiguration
+local.properties
+# macOS
+.DS_Store
+# Native Builds
+.externalNativeBuild
+.cxx
+# Captures
+/captures
+# Temporäre Dateien
+*.log
