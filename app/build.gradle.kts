@@ -1,8 +1,8 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 plugins {
 	id("com.android.application") version "8.13.0" apply true
 	id("org.jetbrains.kotlin.android") version "2.2.20" apply true
 }
-
 android {
 	namespace = "com.dasifa"
 	compileSdk = 36
@@ -27,14 +27,9 @@ android {
 		}
 	}
 	compileOptions {
-		sourceCompatibility = JavaVersion.VERSION_17
-		targetCompatibility = JavaVersion.VERSION_17
-	}
-	kotlinOptions {
-		jvmTarget = "17"
+		jvmTarget.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(17))
 	}
 }
-
 dependencies {
 	implementation("androidx.core:core-ktx:1.17.0")
 	implementation("androidx.appcompat:appcompat:1.7.1")

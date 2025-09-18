@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.storage.StorageManager
@@ -24,6 +25,7 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import java.text.DecimalFormat
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 class MainActivity : AppCompatActivity() {
 
@@ -132,7 +134,11 @@ class MainActivity : AppCompatActivity() {
 			addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
 			addAction("com.dasifa.USB_PERMISSION")
 		}
-		registerReceiver(usbReceiver, filter)
+
+// Registriert den USB-Broadcast-Receiver mit Sicherheitsflag
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			registerReceiver(usbReceiver, IntentFilter("com.dasifa.USB_PERMISSION"), RECEIVER_NOT_EXPORTED)
+		}
 	}
 
 	override fun onDestroy() {
