@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="light_blue">#0288D1</color>
+    <color name="dark_blue">#01579B</color>
+    <color name="white">#FFFFFF</color>
+    <color name="legend_text_color">#FFFFFF</color>
+    <color name="text_color">#FFFFFF</color>
+    <color name="icon_color">#FFFFFF</color>
+</resources>
