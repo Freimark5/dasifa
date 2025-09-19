@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">DaSifA</string>
-    <string name="internal_label">Schmarty</string>
-    <string name="usb_label">USB-Stick</string>
-    <string name="no_usb_message">Kein USB-Gerät angeschlossen</string>
-    <string name="search_button">Suchen</string>
-    <string name="eject_button">Auswerfen</string>
-    <string name="sun_icon">☀️</string>
     <string name="moon_icon">🌙</string>
+    <string name="sun_icon">☀️</string>
+    <string name="search_button">USB suchen</string>
+    <string name="eject_button">USB auswerfen</string>
+    <string name="usb_connected_toast">USB-Stick angeschlossen</string>
+    <string name="usb_disconnected_toast">USB-Stick getrennt</string>
     <string name="usb_selected_toast">USB-Stick ausgewählt</string>
     <string name="usb_selection_failed">USB-Auswahl fehlgeschlagen</string>
-    <string name="usb_eject_wait_toast">USB-Stick wird ausgeworfen…</string>
-    <string name="usb_eject_error">Fehler beim Auswerfen des USB-Sticks</string>
-    <string name="usb_storage_error">Fehler beim Abrufen des USB-Speichers</string>
-    <string name="usb_connected_toast">USB-Stick verbunden</string>
-    <string name="usb_disconnected_toast">USB-Stick getrennt</string>
-    <string name="dasifa_folder_created">DaSifA-Ordner erfolgreich erstellt</string>
-    <string name="dasifa_folder_creation_failed">Fehler beim Erstellen des DaSifA-Ordners</string>
+    <string name="dasifa_folder_created">DaSifA-Ordner erstellt</string>
     <string name="dasifa_folder_exists">DaSifA-Ordner existiert bereits</string>
-    <string name="storage_error">Fehler beim Abrufen des Speichers</string>
+    <string name="dasifa_folder_creation_failed">Erstellung des DaSifA-Ordners fehlgeschlagen</string>
+    <string name="no_usb_message">Kein USB-Stick angeschlossen</string>
+    <string name="internal_storage_label">Belegt: %1$s, Frei: %2$s</string>
+    <string name="usb_storage_label">Belegt: %1$s, Frei: %2$s</string>
 </resources>

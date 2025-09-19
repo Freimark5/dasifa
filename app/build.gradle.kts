@@ -1,11 +1,11 @@
-import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.api.JavaVersion
 plugins {
 	id("com.android.application") version "8.13.0" apply true
 	id("org.jetbrains.kotlin.android") version "2.2.20" apply true
 }
 android {
-	namespace = "com.dasifa"
 	compileSdk = 36
+	namespace = "com.dasifa"
 
 	defaultConfig {
 		applicationId = "com.dasifa"
@@ -13,10 +13,8 @@ android {
 		targetSdk = 36
 		versionCode = 1
 		versionName = "1.0"
-
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
-
 	buildTypes {
 		release {
 			isMinifyEnabled = false
@@ -27,7 +25,11 @@ android {
 		}
 	}
 	compileOptions {
-		jvmTarget.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(17))
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
+	}
+	kotlinOptions {
+		jvmTarget = "17"
 	}
 }
 dependencies {

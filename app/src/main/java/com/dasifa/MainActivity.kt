@@ -1,5 +1,6 @@
 package com.dasifa
 
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -25,21 +26,22 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import java.text.DecimalFormat
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 class MainActivity : AppCompatActivity() {
-
 	private var usbStickUri: Uri? = null
 	private lateinit var usbManager: UsbManager
 	private lateinit var storageManager: StorageManager
-	private var usbReceiver: BroadcastReceiver? = null
+	private lateinit var usbReceiver: BroadcastReceiver
 	private var dasifaFolder: DocumentFile? = null
 	private lateinit var searchButton: Button
 	private lateinit var ejectButton: Button
-	private val tag = "DEBUG_DASIFA"
+	private lateinit var internalChart: PieChart
+	private lateinit var usbChart: PieChart
 	private lateinit var internalLegend: TextView
 	private lateinit var usbLegend: TextView
+	private lateinit var noUsbMessage: TextView
 	private lateinit var darkModeButton: Button
+	private val tag = "DEBUG_DASIFA"
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
@@ -54,8 +56,11 @@ class MainActivity : AppCompatActivity() {
 		storageManager = getSystemService(STORAGE_SERVICE) as StorageManager
 		searchButton = findViewById(R.id.search_button)
 		ejectButton = findViewById(R.id.eject_button)
+		internalChart = findViewById(R.id.internal_chart)
+		usbChart = findViewById(R.id.usb_chart)
 		internalLegend = findViewById(R.id.internal_legend)
 		usbLegend = findViewById(R.id.usb_legend)
+		noUsbMessage = findViewById(R.id.no_usb_message)
 		darkModeButton = findViewById(R.id.dark_mode_button)
 
 		registerUsbReceiver()
@@ -71,56 +76,19 @@ class MainActivity : AppCompatActivity() {
 			unmountUsb()
 		}
 	}
-
-	private fun setupDarkModeToggle() {
-		darkModeButton.text =
-			if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
-				getString(R.string.sun_icon)
-			} else {
-				getString(R.string.moon_icon)
-			}
-		darkModeButton.setOnClickListener {
-			if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
-				AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-			} else {
-				AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-			}
-			recreate()
-		}
-	}
-
-	private fun checkUsbConnected() {
-		Log.d(tag, "checkUsbConnected aufgerufen")
-		val attachedDevices = usbManager.deviceList
-		if (attachedDevices.isNotEmpty() && usbStickUri != null) {
-			updateUsbStorageChart()
-			checkAndCreateDaSifAFolder()
-		} else {
-			findViewById<PieChart>(R.id.usb_storage_chart).visibility = View.GONE
-			findViewById<TextView>(R.id.usb_label).visibility = View.GONE
-			usbLegend.visibility = View.GONE
-			ejectButton.visibility = View.GONE
-			findViewById<TextView>(R.id.no_usb_message).visibility = View.VISIBLE
-		}
-	}
-
 	private fun registerUsbReceiver() {
 		usbReceiver = object : BroadcastReceiver() {
 			override fun onReceive(context: Context, intent: Intent) {
 				Log.d(tag, "USB-Receiver getriggert: Action = ${intent.action}")
 				when (intent.action) {
 					UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-						Toast.makeText(context, R.string.usb_connected_toast, Toast.LENGTH_SHORT)
-							.show()
+						Toast.makeText(context, R.string.usb_connected_toast, Toast.LENGTH_SHORT).show()
 						checkUsbConnected()
 					}
-
 					UsbManager.ACTION_USB_DEVICE_DETACHED -> {
-						Toast.makeText(context, R.string.usb_disconnected_toast, Toast.LENGTH_SHORT)
-							.show()
+						Toast.makeText(context, R.string.usb_disconnected_toast, Toast.LENGTH_SHORT).show()
 						unmountUsb()
 					}
-
 					"com.dasifa.USB_PERMISSION" -> {
 						if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
 							updateUsbStorageChart()
@@ -129,205 +97,111 @@ class MainActivity : AppCompatActivity() {
 				}
 			}
 		}
-		val filter = IntentFilter().apply {
+		val intentFilter = IntentFilter().apply {
 			addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
 			addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
 			addAction("com.dasifa.USB_PERMISSION")
 		}
-
-// Registriert den USB-Broadcast-Receiver mit Sicherheitsflag
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			registerReceiver(usbReceiver, IntentFilter("com.dasifa.USB_PERMISSION"), RECEIVER_NOT_EXPORTED)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			registerReceiver(usbReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
+		} else {
+			@Suppress("DEPRECATION")
+			this@MainActivity.registerReceiver(usbReceiver, intentFilter)
 		}
 	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-		if (usbReceiver != null) {
-			unregisterReceiver(usbReceiver)
-			Log.d(tag, "USB-Receiver unregistriert")
-		}
-	}
-
-	private fun unmountUsb() {
-		Log.d(tag, "unmountUsb aufgerufen")
-		try {
-			usbStickUri?.let { uri ->
-				contentResolver.releasePersistableUriPermission(
-					uri,
-					Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-				)
-				storageManager.storageVolumes.firstOrNull { it.isRemovable }?.let { volume ->
-					try {
-						val uuid = volume.uuid
-						if (uuid != null) {
-							storageManager.javaClass.getMethod("unmount", String::class.java)
-								.invoke(storageManager, uuid)
-							Log.d(tag, "Volume $uuid erfolgreich ausgehängt")
-						}
-					} catch (e: Exception) {
-						Log.e(tag, "Fehler beim Auswerfen des Volumes: ${e.message}")
-					}
-				}
+	private fun setupDarkModeToggle() {
+		darkModeButton.setOnClickListener {
+			val currentMode = AppCompatDelegate.getDefaultNightMode()
+			if (currentMode == AppCompatDelegate.MODE_NIGHT_YES) {
+				AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+				darkModeButton.text = getString(R.string.moon_icon)
+			} else {
+				AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+				darkModeButton.text = getString(R.string.sun_icon)
 			}
-			usbStickUri = null
-			dasifaFolder = null
-			findViewById<PieChart>(R.id.usb_storage_chart).visibility = View.GONE
-			findViewById<TextView>(R.id.usb_label).visibility = View.GONE
-			usbLegend.visibility = View.GONE
-			ejectButton.visibility = View.GONE
-			findViewById<TextView>(R.id.no_usb_message).visibility = View.VISIBLE
-			Toast.makeText(this, R.string.usb_eject_wait_toast, Toast.LENGTH_LONG).show()
-		} catch (e: Exception) {
-			Log.e(tag, "Fehler beim Auswerfen: ${e.message}")
-			Toast.makeText(this, R.string.usb_eject_error, Toast.LENGTH_LONG).show()
+			recreate()
 		}
 	}
 
 	private fun updateInternalStorageChart() {
-		Log.d(tag, "updateInternalStorageChart aufgerufen")
-		val chart = findViewById<PieChart>(R.id.internal_storage_chart)
-		val totalSpace = getTotalInternalStorage()
-		val usedSpace = getUsedInternalStorage()
+		val used = getUsedInternalStorage()
+		val free = getFreeInternalStorage()
+		val total = used + free
+		val usedPercent = if (total > 0) (used * 100f / total) else 0f
+		val freePercent = if (total > 0) (free * 100f / total) else 0f
 
-		if (totalSpace > 0) {
-			val usedPercent = (usedSpace.toFloat() / totalSpace.toFloat()) * 100f
-			val freePercent = 100f - usedPercent
-			val df = DecimalFormat("#.##")
-
-			val entries = mutableListOf<PieEntry>()
-			entries.add(PieEntry(usedPercent)) // Belegt zuerst (Gelb, 12 Uhr)
-			entries.add(PieEntry(freePercent)) // Frei danach (Grün)
-
-			val dataSet = PieDataSet(entries, "")
-			dataSet.colors = listOf("#FFC107".toColorInt(), "#4CAF50".toColorInt()) // Gelb, Grün
-			dataSet.setDrawValues(false)
-			val pieData = PieData(dataSet)
-			chart.data = pieData
-			chart.setRotationAngle(0f) // Start bei 12 Uhr
-			chart.description.isEnabled = false
-			chart.isRotationEnabled = false
-			chart.isDrawHoleEnabled = false
-			chart.holeRadius = 0f
-			chart.setTransparentCircleAlpha(0)
-			chart.legend.isEnabled = false
-			chart.invalidate()
-
-			val legendText = "Frei ${df.format(freePercent)}% Belegt ${df.format(usedPercent)}%"
-			val spannable = android.text.SpannableString(legendText)
-			val belegtIndex = legendText.indexOf("Belegt")
-			spannable.setSpan(
-				android.text.style.ForegroundColorSpan("#4CAF50".toColorInt()),
-				0,
-				belegtIndex,
-				android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-			)
-			spannable.setSpan(
-				android.text.style.ForegroundColorSpan("#FFC107".toColorInt()),
-				belegtIndex,
-				legendText.length,
-				android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-			)
-			internalLegend.text = spannable
-			internalLegend.visibility = View.VISIBLE
-		} else {
-			internalLegend.text = getString(R.string.storage_error)
+		val entries = listOf(
+			PieEntry(usedPercent, "Belegt"),
+			PieEntry(freePercent, "Frei")
+		)
+		val dataSet = PieDataSet(entries, "Interner Speicher").apply {
+			colors = listOf("#FF5722".toColorInt(), "#4CAF50".toColorInt())
 		}
+		val data = PieData(dataSet)
+		internalChart.data = data
+		internalChart.invalidate()
+		internalLegend.text = getString(R.string.internal_storage_label, formatSize(used), formatSize(free))
 	}
 
 	private fun updateUsbStorageChart() {
-		Log.d(tag, "updateUsbStorageChart aufgerufen")
-		val chart = findViewById<PieChart>(R.id.usb_storage_chart)
-		val totalSpace = getTotalUsbStorage()
-		val freeSpace = getFreeUsbStorage()
+		val used = getUsedUsbStorage()
+		val free = getFreeUsbStorage()
+		val total = used + free
+		val usedPercent = if (total > 0) (used * 100f / total) else 0f
+		val freePercent = if (total > 0) (free * 100f / total) else 0f
 
-		if (totalSpace > 0) {
-			val usedSpace = totalSpace - freeSpace
-			val usedPercent = (usedSpace.toFloat() / totalSpace.toFloat()) * 100f
-			val freePercent = 100f - usedPercent
-			val df = DecimalFormat("#.##")
+		val entries = listOf(
+			PieEntry(usedPercent, "Belegt"),
+			PieEntry(freePercent, "Frei")
+		)
+		val dataSet = PieDataSet(entries, "USB-Speicher").apply {
+			colors = listOf("#FF5722".toColorInt(), "#4CAF50".toColorInt())
+		}
+		val data = PieData(dataSet)
+		usbChart.data = data
+		usbChart.invalidate()
+		usbLegend.text = getString(R.string.usb_storage_label, formatSize(used), formatSize(free))
+		ejectButton.visibility = if (total > 0) View.VISIBLE else View.GONE
+		noUsbMessage.visibility = if (total > 0) View.GONE else View.VISIBLE
+	}
 
-			val entries = mutableListOf<PieEntry>()
-			entries.add(PieEntry(usedPercent)) // Belegt zuerst (Gelb, 12 Uhr)
-			entries.add(PieEntry(freePercent)) // Frei danach (Grün)
-
-			val dataSet = PieDataSet(entries, "")
-			dataSet.colors = listOf("#FFC107".toColorInt(), "#4CAF50".toColorInt()) // Gelb, Grün
-			dataSet.setDrawValues(false)
-			val pieData = PieData(dataSet)
-			chart.data = pieData
-			chart.setRotationAngle(0f) // Start bei 12 Uhr
-			chart.description.isEnabled = false
-			chart.isRotationEnabled = false
-			chart.isDrawHoleEnabled = false
-			chart.holeRadius = 0f
-			chart.setTransparentCircleAlpha(0)
-			chart.legend.isEnabled = false
-			chart.visibility = View.VISIBLE
-			chart.invalidate()
-
-			val legendText = "Frei ${df.format(freePercent)}% Belegt ${df.format(usedPercent)}%"
-			val spannable = android.text.SpannableString(legendText)
-			val belegtIndex = legendText.indexOf("Belegt")
-			spannable.setSpan(
-				android.text.style.ForegroundColorSpan("#4CAF50".toColorInt()),
-				0,
-				belegtIndex,
-				android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-			)
-			spannable.setSpan(
-				android.text.style.ForegroundColorSpan("#FFC107".toColorInt()),
-				belegtIndex,
-				legendText.length,
-				android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-			)
-			usbLegend.text = spannable
-			usbLegend.visibility = View.VISIBLE
-
-			findViewById<TextView>(R.id.usb_label).visibility = View.VISIBLE
-			findViewById<TextView>(R.id.no_usb_message).visibility = View.GONE
-			searchButton.visibility = View.VISIBLE
-			ejectButton.visibility = View.VISIBLE
+	private fun checkUsbConnected() {
+		val devices = usbManager.deviceList
+		if (devices.isNotEmpty()) {
+			val device = devices.values.first()
+			if (!usbManager.hasPermission(device)) {
+				usbManager.requestPermission(device, PendingIntent.getBroadcast(this, 0, Intent("com.dasifa.USB_PERMISSION"), PendingIntent.FLAG_IMMUTABLE))
+			} else {
+				updateUsbStorageChart()
+			}
 		} else {
-			Log.e(tag, "Kein USB-Speicher verfügbar oder Zugriff fehlgeschlagen")
-			Toast.makeText(this, R.string.usb_storage_error, Toast.LENGTH_LONG).show()
-			usbLegend.text = getString(R.string.storage_error)
+			ejectButton.visibility = View.GONE
+			noUsbMessage.visibility = View.VISIBLE
 		}
 	}
 
-	private fun getTotalInternalStorage(): Long {
-		return try {
-			val stat = android.os.StatFs(Environment.getExternalStorageDirectory().path)
-			stat.blockCountLong * stat.blockSizeLong
-		} catch (e: Exception) {
-			Log.e(tag, "Fehler beim Abrufen des internen Speichers: ${e.message}")
-			0L
-		}
+	private fun unmountUsb() {
+		usbStickUri = null
+		dasifaFolder = null
+		updateUsbStorageChart()
 	}
 
 	private fun getUsedInternalStorage(): Long {
 		return try {
-			val stat = android.os.StatFs(Environment.getExternalStorageDirectory().path)
+			val stat = android.os.StatFs(Environment.getDataDirectory().path)
 			(stat.blockCountLong - stat.availableBlocksLong) * stat.blockSizeLong
 		} catch (e: Exception) {
-			Log.e(tag, "Fehler beim Abrufen des belegten Speichers: ${e.message}")
+			Log.e(tag, "Fehler beim Abrufen des belegten internen Speichers: ${e.message}")
 			0L
 		}
 	}
 
-	private fun getTotalUsbStorage(): Long {
+	private fun getFreeInternalStorage(): Long {
 		return try {
-			usbStickUri?.let { uri ->
-				val root = DocumentFile.fromTreeUri(this, uri)
-				if (root != null && root.isDirectory) {
-					val stat = android.os.StatFs(root.uri.path ?: return 0L)
-					stat.blockCountLong * stat.blockSizeLong
-				} else {
-					0L
-				}
-			} ?: 0L
+			val stat = android.os.StatFs(Environment.getDataDirectory().path)
+			stat.availableBlocksLong * stat.blockSizeLong
 		} catch (e: Exception) {
-			Log.e(tag, "Fehler beim Abrufen des USB-Speichers: ${e.message}")
+			Log.e(tag, "Fehler beim Abrufen des freien internen Speichers: ${e.message}")
 			0L
 		}
 	}
@@ -366,6 +240,16 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
+	private fun formatSize(size: Long): String {
+		val df = DecimalFormat("#.##")
+		return when {
+			size >= 1_000_000_000 -> "${df.format(size / 1_000_000_000.0)} GB"
+			size >= 1_000_000 -> "${df.format(size / 1_000_000.0)} MB"
+			size >= 1_000 -> "${df.format(size / 1_000.0)} KB"
+			else -> "$size B"
+		}
+	}
+
 	private fun checkAndCreateDaSifAFolder() {
 		Log.d(tag, "checkAndCreateDaSifAFolder aufgerufen")
 		usbStickUri?.let { uri ->
@@ -382,8 +266,7 @@ class MainActivity : AppCompatActivity() {
 					Toast.makeText(this, R.string.dasifa_folder_exists, Toast.LENGTH_SHORT).show()
 				}
 			} else {
-				Toast.makeText(this, R.string.dasifa_folder_creation_failed, Toast.LENGTH_LONG)
-					.show()
+				Toast.makeText(this, R.string.dasifa_folder_creation_failed, Toast.LENGTH_LONG).show()
 			}
 		}
 	}
@@ -403,4 +286,11 @@ class MainActivity : AppCompatActivity() {
 				Toast.makeText(this, R.string.usb_selection_failed, Toast.LENGTH_LONG).show()
 			}
 		}
+
+	override fun onDestroy() {
+		super.onDestroy()
+		if (::usbReceiver.isInitialized) {
+			unregisterReceiver(usbReceiver)
+		}
+	}
 }

@@ -4,6 +4,7 @@
     <color name="dark_blue">#00008B</color>
     <color name="white">#FFFFFF</color>
     <color name="text_color">#000000</color>
-    <color name="legend_text_color">#333333</color>
+    <color name="dark_background">#121212</color>
     <color name="icon_color">#000000</color>
+    <color name="legend_text_color">#000000</color>
 </resources>
