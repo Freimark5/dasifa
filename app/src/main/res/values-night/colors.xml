@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="InconsistentResourceLocation">
     <!-- Augenfreundliche Farben für Dark-Mode -->
-    <color name="dark_background">#121212</color>
-    <color name="dark_primary">#81C784</color>
-    <color name="dark_accent">#64B5F6</color>
-    <color name="dark_text">#E0E0E0</color>
-    <color name="dark_icon">#B0BEC5</color>
-    <color name="legend_text_color">#E0E0E0</color>
+    <color name="dark_background">#1C2526</color> <!-- Tiefes Grau -->
+    <color name="dark_primary">#4CAF50</color> <!-- Sanftes Grün -->
+    <color name="dark_accent">#4FC3F7</color> <!-- Helles Blau -->
+    <color name="dark_text">#CFD8DC</color> <!-- Helles Grau -->
+    <color name="dark_icon">#90CAF9</color> <!-- Blaues Icon -->
+    <color name="legend_text_color">#CFD8DC</color>
 </resources>

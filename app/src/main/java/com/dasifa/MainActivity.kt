@@ -105,7 +105,12 @@ class MainActivity : AppCompatActivity() {
 					}
 					"com.dasifa.USB_PERMISSION" -> {
 						if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+							Log.d(tag, "USB-Berechtigung erteilt, scanne USB")
 							updateUsbStorageChart()
+							checkAndCreateDaSifAFolder()
+						} else {
+							Log.d(tag, "USB-Berechtigung verweigert")
+							Toast.makeText(context, R.string.usb_selection_failed, Toast.LENGTH_LONG).show()
 						}
 					}
 				}
@@ -158,7 +163,7 @@ class MainActivity : AppCompatActivity() {
 		val data = PieData(dataSet)
 		internalChart.apply {
 			this.data = data
-			rotationAngle = 0f // Startet bei 0°
+			rotationAngle = 0f // Belegt bei 0°
 			setDrawCenterText(false) // Kein weißer Kern
 			setRotationEnabled(false) // Nicht drehbar
 			setHighlightPerTapEnabled(true) // Anwählbar
@@ -198,7 +203,7 @@ class MainActivity : AppCompatActivity() {
 		val data = PieData(dataSet)
 		usbChart.apply {
 			this.data = data
-			rotationAngle = 0f // Startet bei 0°
+			rotationAngle = 0f // Belegt bei 0°
 			setDrawCenterText(false) // Kein weißer Kern
 			setRotationEnabled(false) // Nicht drehbar
 			setHighlightPerTapEnabled(true) // Anwählbar
@@ -215,7 +220,7 @@ class MainActivity : AppCompatActivity() {
 		}
 		usbLegend.text = getString(R.string.usb_storage_label, df.format(usedPercent), df.format(freePercent))
 		usbSize.text = getString(R.string.storage_size, df.format(used / 1_000_000_000.0), df.format(free / 1_000_000_000.0))
-		usbLabel.text = getString(R.string.schmarty_label)
+		usbLabel.text = getString(R.string.usb_label)
 		ejectButton.visibility = if (total > 0) View.VISIBLE else View.GONE
 		noUsbMessage.visibility = if (total > 0) View.GONE else View.VISIBLE
 	}
@@ -223,14 +228,19 @@ class MainActivity : AppCompatActivity() {
 	// Prüft, ob ein USB-Gerät angeschlossen ist
 	private fun checkUsbConnected() {
 		val devices = usbManager.deviceList
+		Log.d(tag, "checkUsbConnected: ${devices.size} Geräte gefunden")
 		if (devices.isNotEmpty()) {
 			val device = devices.values.first()
 			if (!usbManager.hasPermission(device)) {
+				Log.d(tag, "Keine Berechtigung für USB, fordere an")
 				usbManager.requestPermission(device, PendingIntent.getBroadcast(this, 0, Intent("com.dasifa.USB_PERMISSION"), PendingIntent.FLAG_IMMUTABLE))
 			} else {
+				Log.d(tag, "Berechtigung vorhanden, scanne USB")
 				updateUsbStorageChart()
+				checkAndCreateDaSifAFolder()
 			}
 		} else {
+			Log.d(tag, "Kein USB-Gerät angeschlossen")
 			ejectButton.visibility = View.GONE
 			noUsbMessage.visibility = View.VISIBLE
 		}
@@ -344,9 +354,11 @@ class MainActivity : AppCompatActivity() {
 					Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 				)
 				Toast.makeText(this, R.string.usb_selected_toast, Toast.LENGTH_LONG).show()
+				Log.d(tag, "USB ausgewählt, scanne USB")
 				updateUsbStorageChart()
 				checkAndCreateDaSifAFolder()
 			} else {
+				Log.d(tag, "USB-Auswahl abgebrochen")
 				Toast.makeText(this, R.string.usb_selection_failed, Toast.LENGTH_LONG).show()
 			}
 		}

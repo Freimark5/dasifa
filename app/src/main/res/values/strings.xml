@@ -24,4 +24,5 @@
     <string name="usb_storage_label">Belegt %1$s%%   Frei %2$s%%</string>
     <string name="storage_size">%1$s GB // %2$s GB</string>
     <string name="schmarty_label">Schmarty</string>
+    <string name="usb_label">USB-Stick</string>
 </resources>

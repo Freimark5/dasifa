@@ -7,13 +7,13 @@
     android:background="@color/light_background"
     android:fitsSystemWindows="true">
 
-    <!-- Darkmode-Toggle-Button rechts oben -->
+    <!-- Darkmode-Toggle-Button rechts oben, ohne Kasten -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/dark_mode_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/moon_icon"
-        android:backgroundTint="@color/light_primary"
+        android:background="@null"
         android:textColor="@color/light_icon"
         android:textSize="24sp"
         app:cornerRadius="0dp"
@@ -35,8 +35,8 @@
             android:id="@+id/internal_chart"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintWidth_percent="0.5"
-            app:layout_constraintHeight_percent="0.6"
+            app:layout_constraintWidth_percent="0.33"
+            app:layout_constraintHeight_percent="0.4"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -101,8 +101,8 @@
             android:id="@+id/usb_chart"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintWidth_percent="0.5"
-            app:layout_constraintHeight_percent="0.6"
+            app:layout_constraintWidth_percent="0.33"
+            app:layout_constraintHeight_percent="0.4"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -133,7 +133,7 @@
             android:id="@+id/usb_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/schmarty_label"
+            android:text="@string/usb_label"
             android:textSize="14sp"
             android:textColor="@color/legend_text_color"
             app:layout_constraintTop_toBottomOf="@id/usb_size"
