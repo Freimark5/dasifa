@@ -1,0 +1,3 @@
+# Pfad: D:\Workspaces\AndroidWorkspace\dasifa\.gitattributes
+*.xml text eol=crlf
+*.kt text eol=crlf
