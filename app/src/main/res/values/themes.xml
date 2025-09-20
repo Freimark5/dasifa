@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Light-Mode Theme -->
     <style name="Base_Theme_DaSifA" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/light_blue</item>
-        <item name="colorPrimaryDark">@color/dark_blue</item>
-        <item name="colorAccent">@color/white</item>
-        <item name="android:statusBarColor">@color/light_blue</item>
-        <item name="android:windowBackground">@color/light_blue</item>
-        <item name="android:textColor">@color/text_color</item>
+        <item name="colorPrimary">@color/light_primary</item>
+        <item name="colorPrimaryDark">@color/light_accent</item>
+        <item name="colorAccent">@color/light_accent</item>
+        <item name="android:statusBarColor">@color/light_primary</item>
+        <item name="android:windowBackground">@color/light_background</item>
+        <item name="android:textColor">@color/light_text</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
+    <!-- Dark-Mode Theme -->
     <style name="Base_Theme_DaSifA_Dark" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/dark_blue</item>
-        <item name="colorPrimaryDark">@color/light_blue</item>
-        <item name="colorAccent">@color/white</item>
-        <item name="android:statusBarColor">@color/dark_blue</item>
-        <item name="android:windowBackground">@color/light_blue</item>
-        <item name="android:textColor">@color/text_color</item>
+        <item name="colorPrimary">@color/dark_primary</item>
+        <item name="colorPrimaryDark">@color/dark_accent</item>
+        <item name="colorAccent">@color/dark_accent</item>
+        <item name="android:statusBarColor">@color/dark_primary</item>
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="android:textColor">@color/dark_text</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 </resources>

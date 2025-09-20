@@ -3,31 +3,31 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/light_background"
+    android:fitsSystemWindows="true">
 
-    <!-- Darkmode-Toggle-Button rechts oben ohne Rundung -->
+    <!-- Darkmode-Toggle-Button rechts oben -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/dark_mode_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/moon_icon"
-        android:backgroundTint="@color/light_blue"
-        android:textColor="@color/icon_color"
+        android:backgroundTint="@color/light_primary"
+        android:textColor="@color/light_icon"
         android:textSize="24sp"
         app:cornerRadius="0dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintHorizontal_bias="0.95"
         android:padding="12dp"
-        android:layout_margin="4dp" />
+        android:layout_margin="8dp" />
 
-    <!-- Container für Schmarty, PieChart, Legende und Suchen-Button -->
+    <!-- Container für internen Speicher -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/internal_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintHeight_percent="0.45"
         app:layout_constraintTop_toBottomOf="@id/dark_mode_button"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -35,8 +35,8 @@
             android:id="@+id/internal_chart"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintWidth_percent="0.4"
-            app:layout_constraintHeight_percent="0.8"
+            app:layout_constraintWidth_percent="0.5"
+            app:layout_constraintHeight_percent="0.6"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -45,9 +45,32 @@
             android:id="@+id/internal_legend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@color/text_color"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
             app:layout_constraintTop_toBottomOf="@id/internal_chart"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/internal_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
+            app:layout_constraintTop_toBottomOf="@id/internal_legend"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/internal_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/schmarty_label"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
+            app:layout_constraintTop_toBottomOf="@id/internal_size"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="4dp" />
@@ -57,65 +80,92 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search_button"
-            android:backgroundTint="@color/dark_blue"
-            android:textColor="@color/white"
-            app:layout_constraintTop_toBottomOf="@id/internal_legend"
+            android:backgroundTint="@color/light_accent"
+            android:textColor="@color/light_text"
+            app:layout_constraintTop_toBottomOf="@id/internal_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Container für USB-Speicher -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/usb_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.45"
+        app:layout_constraintTop_toBottomOf="@id/internal_container"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/usb_chart"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintWidth_percent="0.5"
+            app:layout_constraintHeight_percent="0.6"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/usb_legend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
+            app:layout_constraintTop_toBottomOf="@id/usb_chart"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/usb_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
+            app:layout_constraintTop_toBottomOf="@id/usb_legend"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/usb_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/schmarty_label"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
+            app:layout_constraintTop_toBottomOf="@id/usb_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/eject_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/eject_button"
+            android:backgroundTint="@color/light_accent"
+            android:textColor="@color/light_text"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/usb_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/no_usb_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_usb_message"
+            android:textSize="14sp"
+            android:textColor="@color/legend_text_color"
+            android:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/eject_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- USB-PieChart -->
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/usb_chart"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintWidth_percent="0.4"
-        app:layout_constraintHeight_percent="0.3"
-        app:layout_constraintTop_toBottomOf="@id/internal_container"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp" />
-
-    <!-- USB-Legende -->
-    <TextView
-        android:id="@+id/usb_legend"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/text_color"
-        app:layout_constraintTop_toBottomOf="@id/usb_chart"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp" />
-
-    <!-- Auswerfen-Button (unsichtbar bei Start) -->
-    <Button
-        android:id="@+id/eject_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/eject_button"
-        android:backgroundTint="@color/dark_blue"
-        android:textColor="@color/white"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/usb_legend"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp"
-        android:padding="8dp" />
-
-    <!-- Kein USB-Nachricht -->
-    <TextView
-        android:id="@+id/no_usb_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_usb_message"
-        android:textSize="16sp"
-        android:textColor="@color/text_color"
-        android:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@id/internal_container"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

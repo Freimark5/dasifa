@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App-Name für AndroidManifest -->
     <string name="app_name">DaSifA</string>
+    <!-- Dark/Light-Mode Icons -->
     <string name="moon_icon">🌙</string>
     <string name="sun_icon">☀️</string>
-    <string name="search_button">USB suchen</string>
-    <string name="eject_button">USB auswerfen</string>
-    <string name="usb_connected_toast">USB-Stick angeschlossen</string>
-    <string name="usb_disconnected_toast">USB-Stick getrennt</string>
+    <!-- Button-Texte -->
+    <string name="search_button">Suchen</string>
+    <string name="eject_button">Auswerfen</string>
+    <!-- USB-Toasts -->
+    <string name="usb_connected_toast">USB-Gerät angeschlossen</string>
+    <string name="usb_disconnected_toast">USB-Gerät getrennt</string>
     <string name="usb_selected_toast">USB-Stick ausgewählt</string>
     <string name="usb_selection_failed">USB-Auswahl fehlgeschlagen</string>
+    <!-- DaSifA-Ordner -->
     <string name="dasifa_folder_created">DaSifA-Ordner erstellt</string>
     <string name="dasifa_folder_exists">DaSifA-Ordner existiert bereits</string>
-    <string name="dasifa_folder_creation_failed">Erstellung des DaSifA-Ordners fehlgeschlagen</string>
-    <string name="no_usb_message">Kein USB-Stick angeschlossen</string>
-    <string name="internal_storage_label">Belegt: %1$s, Frei: %2$s</string>
-    <string name="usb_storage_label">Belegt: %1$s, Frei: %2$s</string>
+    <string name="dasifa_folder_creation_failed">DaSifA-Ordner konnte nicht erstellt werden</string>
+    <!-- USB-Nachricht -->
+    <string name="no_usb_message">Kein USB-Gerät angeschlossen</string>
+    <!-- PieChart-Legenden -->
+    <string name="internal_storage_label">Belegt %1$s%%   Frei %2$s%%</string>
+    <string name="usb_storage_label">Belegt %1$s%%   Frei %2$s%%</string>
+    <string name="storage_size">%1$s GB // %2$s GB</string>
+    <string name="schmarty_label">Schmarty</string>
 </resources>
