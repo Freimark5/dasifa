@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/light_background"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="false">
 
     <!-- Darkmode-Toggle-Button rechts oben, ohne Kasten -->
     <com.google.android.material.button.MaterialButton

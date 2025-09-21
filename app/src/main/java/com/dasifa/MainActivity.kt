@@ -13,12 +13,14 @@ import android.os.Environment
 import android.os.storage.StorageManager
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.documentfile.provider.DocumentFile
 import com.github.mikephil.charting.charts.PieChart
@@ -50,8 +52,11 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var darkModeButton: Button
 	private val tag = "DEBUG_DASIFA"
 
-	// Initialisiert die Activity und setzt Theme, Views und Listener
 	override fun onCreate(savedInstanceState: Bundle?) {
+		window.setFlags(
+			WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+			WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+		)
 		if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
 			setTheme(R.style.Base_Theme_DaSifA_Dark)
 		} else {
@@ -89,7 +94,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Registriert den BroadcastReceiver für USB-Events
 	private fun registerUsbReceiver() {
 		usbReceiver = object : BroadcastReceiver() {
 			override fun onReceive(context: Context, intent: Intent) {
@@ -125,11 +129,15 @@ class MainActivity : AppCompatActivity() {
 			registerReceiver(usbReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
 		} else {
 			@Suppress("DEPRECATION")
-			this@MainActivity.registerReceiver(usbReceiver, intentFilter)
+			ContextCompat.registerReceiver(
+				this@MainActivity,
+				usbReceiver,
+				intentFilter,
+				ContextCompat.RECEIVER_NOT_EXPORTED
+			)
 		}
 	}
 
-	// Richtet den Dark-Mode-Schalter ein
 	private fun setupDarkModeToggle() {
 		darkModeButton.setOnClickListener {
 			val currentMode = AppCompatDelegate.getDefaultNightMode()
@@ -143,7 +151,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Aktualisiert das PieChart für internen Speicher
 	private fun updateInternalStorageChart() {
 		val used = getUsedInternalStorage()
 		val free = getFreeInternalStorage()
@@ -158,24 +165,24 @@ class MainActivity : AppCompatActivity() {
 		)
 		val dataSet = PieDataSet(entries, "").apply {
 			colors = listOf("#FF5722".toColorInt(), "#4CAF50".toColorInt())
-			setDrawValues(false) // Keine Beschriftung
+			setDrawValues(false)
 		}
 		val data = PieData(dataSet)
 		internalChart.apply {
 			this.data = data
-			rotationAngle = 0f // Belegt bei 0°
-			setDrawCenterText(false) // Kein weißer Kern
-			setRotationEnabled(false) // Nicht drehbar
-			setHighlightPerTapEnabled(true) // Anwählbar
+			rotationAngle = 0f
+			setDrawCenterText(false)
+			setRotationEnabled(false)
+			setHighlightPerTapEnabled(true)
 			setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
 				override fun onValueSelected(e: Entry?, h: Highlight?) {
 					Toast.makeText(this@MainActivity, "Ausgewählt: ${(e as PieEntry).label}", Toast.LENGTH_SHORT).show()
 				}
 				override fun onNothingSelected() {}
 			})
-			description.isEnabled = false // Kein "Description Label"
-			legend.isEnabled = false // Keine Standard-Legende
-			setNoDataText("") // Kein "No Chart Data available"
+			description.isEnabled = false
+			legend.isEnabled = false
+			setNoDataText("")
 			invalidate()
 		}
 		internalLegend.text = getString(R.string.internal_storage_label, df.format(usedPercent), df.format(freePercent))
@@ -183,7 +190,6 @@ class MainActivity : AppCompatActivity() {
 		internalLabel.text = getString(R.string.schmarty_label)
 	}
 
-	// Aktualisiert das PieChart für USB-Speicher
 	private fun updateUsbStorageChart() {
 		val used = getUsedUsbStorage()
 		val free = getFreeUsbStorage()
@@ -198,24 +204,24 @@ class MainActivity : AppCompatActivity() {
 		)
 		val dataSet = PieDataSet(entries, "").apply {
 			colors = listOf("#FF5722".toColorInt(), "#4CAF50".toColorInt())
-			setDrawValues(false) // Keine Beschriftung
+			setDrawValues(false)
 		}
 		val data = PieData(dataSet)
 		usbChart.apply {
 			this.data = data
-			rotationAngle = 0f // Belegt bei 0°
-			setDrawCenterText(false) // Kein weißer Kern
-			setRotationEnabled(false) // Nicht drehbar
-			setHighlightPerTapEnabled(true) // Anwählbar
+			rotationAngle = 0f
+			setDrawCenterText(false)
+			setRotationEnabled(false)
+			setHighlightPerTapEnabled(true)
 			setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
 				override fun onValueSelected(e: Entry?, h: Highlight?) {
 					Toast.makeText(this@MainActivity, "Ausgewählt: ${(e as PieEntry).label}", Toast.LENGTH_SHORT).show()
 				}
 				override fun onNothingSelected() {}
 			})
-			description.isEnabled = false // Kein "Description Label"
-			legend.isEnabled = false // Keine Standard-Legende
-			setNoDataText("") // Kein "No Chart Data available"
+			description.isEnabled = false
+			legend.isEnabled = false
+			setNoDataText("")
 			invalidate()
 		}
 		usbLegend.text = getString(R.string.usb_storage_label, df.format(usedPercent), df.format(freePercent))
@@ -225,7 +231,6 @@ class MainActivity : AppCompatActivity() {
 		noUsbMessage.visibility = if (total > 0) View.GONE else View.VISIBLE
 	}
 
-	// Prüft, ob ein USB-Gerät angeschlossen ist
 	private fun checkUsbConnected() {
 		val devices = usbManager.deviceList
 		Log.d(tag, "checkUsbConnected: ${devices.size} Geräte gefunden")
@@ -246,14 +251,12 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Trennt den USB-Stick
 	private fun unmountUsb() {
 		usbStickUri = null
 		dasifaFolder = null
 		updateUsbStorageChart()
 	}
 
-	// Berechnet den belegten internen Speicher
 	private fun getUsedInternalStorage(): Long {
 		return try {
 			val stat = android.os.StatFs(Environment.getDataDirectory().path)
@@ -264,7 +267,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Berechnet den freien internen Speicher
 	private fun getFreeInternalStorage(): Long {
 		return try {
 			val stat = android.os.StatFs(Environment.getDataDirectory().path)
@@ -275,7 +277,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Berechnet den belegten USB-Speicher
 	private fun getUsedUsbStorage(): Long {
 		return try {
 			usbStickUri?.let { uri ->
@@ -293,7 +294,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Berechnet den freien USB-Speicher
 	private fun getFreeUsbStorage(): Long {
 		return try {
 			usbStickUri?.let { uri ->
@@ -311,7 +311,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Formatiert die Speichergröße in lesbares Format
 	private fun formatSize(size: Long): String {
 		val df = DecimalFormat("#.##")
 		return when {
@@ -322,7 +321,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Erstellt den DaSifA-Ordner auf dem USB-Stick
 	private fun checkAndCreateDaSifAFolder() {
 		Log.d(tag, "checkAndCreateDaSifAFolder aufgerufen")
 		usbStickUri?.let { uri ->
@@ -344,7 +342,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	// Startet den SAF-Dialog für USB-Auswahl
 	private val storageAccessLauncher =
 		registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
 			if (uri != null) {
@@ -363,7 +360,6 @@ class MainActivity : AppCompatActivity() {
 			}
 		}
 
-	// Bereinigt den BroadcastReceiver
 	override fun onDestroy() {
 		super.onDestroy()
 		if (::usbReceiver.isInitialized) {
